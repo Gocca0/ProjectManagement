@@ -9,15 +9,34 @@
         @hidden="hiddenPopup"
         @showing="Showing"
         >
-        <EmployeeDataGrid :project-id="projectId" :data-sourceg="gridEmployeeDataSource" @return-data-source="retDataSource"/>
-        <TaskDataGrid :data-sourceg="gridTasksDataSource"/>
-        <div>
-            <DxButton
-                text="Вывести в консоль пропсы"
-                @click="Information"
+        <DxForm>
+            <DxGroupItem
+                caption="Загрузить файлы"
             >
-            </DxButton>
-        </div>
+                <FileUpLoader 
+                    @return-data-source="retDataSourceFile"
+                    :data-source="gridFileDataSorce" 
+                    :project-id="projectId"
+                />
+            </DxGroupItem>
+            <DxGroupItem
+                caption="Сотрудники пректа"
+            >
+                <EmployeeDataGrid :project-id="projectId" :data-sourceg="gridEmployeeDataSource" @return-data-source="retDataSourceEmployee"/>
+            </DxGroupItem>
+            <DxGroupItem
+                caption="Задачи проекта"
+            >
+                <TaskDataGrid :data-sourceg="gridTasksDataSource"/>
+            </DxGroupItem>           
+            <div>
+                <DxButton
+                    text="Вывести в консоль пропсы"
+                    @click="Information"
+                >
+                </DxButton>
+            </div>
+        </DxForm>
         </DefaultPopup>
    </div>
    
@@ -27,9 +46,11 @@
     import { DxPopup as DefaultPopup } from 'devextreme-vue/popup';
     import {computed, defineComponent, onMounted, onUpdated, reactive, ref, toRef} from 'vue';
     import { DxButton } from 'devextreme-vue/button';
+    import { DxForm, DxItem,DxGroupItem } from 'devextreme-vue/form';
     import EmployeeDataGrid from './EmployeeDataGrid.vue';
     import axios from 'axios';
-import TaskDataGrid from './TaskDataGrid.vue';
+    import TaskDataGrid from './TaskDataGrid.vue';
+    import FileUpLoader from './FileUpLoader.vue';
 
     const emit = defineEmits<{
         (event: "hidden-popup", isActive: boolean): void;
@@ -48,11 +69,16 @@ import TaskDataGrid from './TaskDataGrid.vue';
     const projectId = computed(() => props.dataSelectedRow?.id )
     const gridEmployeeDataSource =  ref()
     const gridTasksDataSource =  ref()
+    const gridFileDataSorce = ref()
    
     
-    function retDataSource(){
+    async function retDataSourceEmployee(){
         console.log("retDataSource");
-        GetProjectsWithEmployees(projectId.value)
+        await GetProjectsWithEmployees(projectId.value)
+        
+    }
+    async function retDataSourceFile() {
+        await GetFiles(projectId.value)
     }
 
     function hiddenPopup(e:any){
@@ -61,12 +87,22 @@ import TaskDataGrid from './TaskDataGrid.vue';
     function Showing(){
         console.log("Showing")
         GetProjectsWithEmployees(projectId.value)
+        GetFiles(projectId.value)
     }
     function Information(){
         console.log(props.isPopupVisible)
         console.log(props.dataSelectedRow)
         console.log(projectId)
         console.log(gridEmployeeDataSource)
+    }
+
+
+    async function GetFiles(id:number){
+        const res = await axios.get(`https://localhost:7104/api/File/${id}`)
+        gridFileDataSorce.value = res.data
+        console.log("gridFileDataSorce")
+        console.log(gridFileDataSorce.value)
+
     }
 
     async function GetProjectsWithEmployees(id:number){

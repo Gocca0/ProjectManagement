@@ -6,6 +6,7 @@
         :dataSource = dataSource
         :selection="{ mode: 'single' }"
         :show-borders="true"
+        :height="342"
         key-expr="id"
         @selection-changed="selectedChanged"
         @row-removing="onRowRemoving"
@@ -73,7 +74,12 @@
 
         <DxFilterRow :visible="true"/>
         
-
+        <DxPager
+          :visible="true"
+          display-mode="full"
+          :show-navigation-buttons="true"
+        />
+        <DxPaging :page-size="5"/>
         
 
         <template #deleteBtn-template>
@@ -198,7 +204,9 @@
     DxPopup,
     DxForm,
     DxCustomRule,
-    DxHeaderFilter
+    DxHeaderFilter,
+    DxPager,
+    DxPaging
     
   } from 'devextreme-vue/data-grid';
   import { DxLookup, DxDropDownOptions } from 'devextreme-vue/lookup';
